@@ -1,6 +1,5 @@
-
-def Subject():
-    return type('Subject', (), {'__init__': subject_init})
+class SubjectModel(object):
+    pass
 
 def subject_init(self, attributes):
     combined = 0
@@ -9,3 +8,6 @@ def subject_init(self, attributes):
             combined += float(value)
         setattr(self, attr, float(value))
     self.combined = combined
+
+Subject = type('Subject', (SubjectModel, ), {'__init__': subject_init})
+
