@@ -1,1 +1,1 @@
-__all__ = ['group', 'subject']
+__all__ = ['group', 'subject', 'model_utils']
