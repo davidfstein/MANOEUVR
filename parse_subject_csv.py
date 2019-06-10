@@ -10,8 +10,3 @@ def parse_subject_csv(path):
             subject = dict(zip(headers, line))
             subjects.append(subject)
         return subjects
-
-if __name__ == '__main__':
-    s = parse_subject_csv('axolotl.csv')
-    for d in s:
-        print(d)
