@@ -2,18 +2,18 @@ from models.group import Group
 from models.subject import Subject
 from parse_subject_csv import parse_subject_csv
 from write_groups_csv import write_groups
+from models import model_utils
 import random
 import math
 import multiprocessing
+import time
 
 def generate_subjects():
-    TestSubject = Subject()
+    TestSubject = Subject
     subject_dict = parse_subject_csv('axolotl.csv')
     subjects = []
     for subject in subject_dict:
         subjects.append(TestSubject(subject))
-    # for s in subjects:
-    #     print(', '.join("%s: %s" % item for item in vars(s).items()))
     return subjects
 
 def generate_groups(num_groups):
@@ -40,12 +40,6 @@ def add_subject_least_difference(groups, subject, subjects_per_group):
             min_index = i
     groups[min_index].add_subject(subject)
 
-def total_subject_scores(group):
-    total = 0
-    for subject in group.subjects:
-        total += subject.combined
-    return total
-
 def score_range(groups):
     max_score = 0
     min_score = math.inf
@@ -56,7 +50,7 @@ def score_range(groups):
             max_score = group.combined_score
     return max_score - min_score
 
-def best_groups(subjects, iterations, num_groups, subjects_per_group, result):
+def best_groups(subjects, iterations, num_groups, subjects_per_group, results):
     best_groups = None
     best_range = math.inf
     for _ in range(iterations):
@@ -68,7 +62,8 @@ def best_groups(subjects, iterations, num_groups, subjects_per_group, result):
         if group_range < best_range:
             best_range = group_range
             best_groups = groups
-    result.append(best_groups)
+    results.append(best_groups)
+    return best_groups
 
 def multi(subjects, iterations, num_groups, subjects_per_group):
     manager = multiprocessing.Manager()
@@ -91,14 +86,15 @@ def multi_best(groups):
         group_range = score_range(group)
         if group_range < best_range:
             best_range = group_range
-            best_groups = groups
+            best_groups = group
     return best_groups
 
-if __name__ == '__main__':
+def main():
     subjects = generate_subjects()
-    # groups = best_groups(subjects, 10000000, 4, 8)
-    # write_groups(groups)
-    groups = multi(subjects, 10, 4, 8)
+    groups = multi(subjects, 1000000000, 4, 8)
     best = multi_best(groups)
-    write_groups(groups)
+    print(score_range(best))
+    write_groups(best)
 
+if __name__ == '__main__':
+    main()
