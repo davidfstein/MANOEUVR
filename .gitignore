@@ -1,0 +1,10 @@
+## VSCode ##
+.VSCode
+
+## Python Extras ##
+*.pyc
+__pycache__/
+
+## Output Files ###
+*.csv
+
