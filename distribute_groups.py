@@ -66,12 +66,12 @@ def best_groups(subjects, iterations, num_groups, subjects_per_group, results):
     results.append(best_groups)
     return best_groups
 
-def multi(subjects, iterations, num_groups, subjects_per_group):
+def multi(subjects, iterations, num_groups, subjects_per_group, processes):
     manager = multiprocessing.Manager()
     result = manager.list()
-    sub_iters = math.floor(iterations / 8)
+    sub_iters = math.floor(iterations / processes)
     jobs = []
-    for _ in range(8):
+    for _ in range(processes):
         p = multiprocessing.Process(target=best_groups, args=(subjects, sub_iters, num_groups, subjects_per_group, result, ))
         jobs.append(p)
         p.start()
@@ -105,15 +105,18 @@ def main():
                                 help='The number of desired groups.')
     requiredNamed.add_argument('-s', '--SubjectsPerGroup', action='store', type=int,
                                 help='The number of desired subjects per group.')
+    requiredNamed.add_argument('-p', '--processes', action='store', type=int, default=1,
+                                help='Can be run using multiple processes. Default is a single process.')
 
     args = userInput.parse_args()
     input_file = args.file
     iterations = args.iterations
     groups = args.groups
     subjects_per_group = args.SubjectsPerGroup
+    processes = args.processes
 
     subjects = generate_subjects(input_file)
-    groups = multi(subjects, iterations, groups, subjects_per_group)
+    groups = multi(subjects, iterations, groups, subjects_per_group, processes)
     best = multi_best(groups)
     print(score_range(best))
     write_groups(best)
