@@ -3,14 +3,15 @@ from models.subject import Subject
 from parse_subject_csv import parse_subject_csv
 from write_groups_csv import write_groups
 from models import model_utils
+import argparse
 import random
 import math
 import multiprocessing
-import time
+import timeit
 
-def generate_subjects():
+def generate_subjects(path):
     TestSubject = Subject
-    subject_dict = parse_subject_csv('axolotl.csv')
+    subject_dict = parse_subject_csv(path)
     subjects = []
     for subject in subject_dict:
         subjects.append(TestSubject(subject))
@@ -90,11 +91,34 @@ def multi_best(groups):
     return best_groups
 
 def main():
-    subjects = generate_subjects()
-    groups = multi(subjects, 1000000000, 4, 8)
+
+    start_time = timeit.default_timer()
+
+    userInput = argparse.ArgumentParser(description=
+        'Requires a CSV file as input. Returns a csv file with subjects split into groups.')
+    requiredNamed = userInput.add_argument_group('required arguments')
+    requiredNamed.add_argument('-f', '--file', action='store', type=str,
+                                help='Path to the csv file containing subjects.')
+    requiredNamed.add_argument('-i', '--iterations', action='store', type=int,
+                                help='The number of iterations to shuffle the subjects and greedily find a low variabilty grouping.')
+    requiredNamed.add_argument('-g', '--groups', action='store', type=int,
+                                help='The number of desired groups.')
+    requiredNamed.add_argument('-s', '--SubjectsPerGroup', action='store', type=int,
+                                help='The number of desired subjects per group.')
+
+    args = userInput.parse_args()
+    input_file = args.file
+    iterations = args.iterations
+    groups = args.groups
+    subjects_per_group = args.SubjectsPerGroup
+
+    subjects = generate_subjects(input_file)
+    groups = multi(subjects, iterations, groups, subjects_per_group)
     best = multi_best(groups)
     print(score_range(best))
     write_groups(best)
+
+    print('Execution time %f' % (timeit.default_timer() - start_time))
 
 if __name__ == '__main__':
     main()
